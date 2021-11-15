@@ -91,9 +91,9 @@ dependencies = [
 
 [[package]]
 name = "powercap"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9634a403ccfe9a7410a93ebf96e5da7f5c4e89f11281589b021f976dd7b8111"
+checksum = "c610e3c8c9e16c7052afdba7995d1b001f2fd4692bf80df65f3e1df6ba0c35a7"
 dependencies = [
  "procfs",
  "regex",
