@@ -1,10 +1,14 @@
 [package]
 name = "joule"
 version = "0.1.0"
+authors = ["Jeremie Drouet <jeremie.drouet@gmail.com>"]
 edition = "2018"
+description = "A command to monitor the energy consumption of a subcommand"
+readme = "readme.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = { version = "3.0.0-beta.5" }
 powercap = { version = "^0.3.2" }
 procfs = { default-features = false, version = "^0.11" }
