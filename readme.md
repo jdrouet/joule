@@ -1,6 +1,6 @@
 # Joule
 
-This tool was made for monitoring the energy consumption of command, the same way the command `time` monitors the time used by a command.
+This CLI tool was made for monitoring the energy consumption, by taking energy snapshots of the CPU at a given point in time.
 
 ## Howto use it
 
@@ -12,10 +12,12 @@ cd joule
 # build it
 cargo build --release
 # use it
-sudo ./target/release/joule make real-music
+sudo ./target/release/joule snapshot path/to/first-snapshot.json
+sudo ./target/release/joule snapshot path/to/second-snapshot.json
+./target/release/joule compare path/to/first-snapshot.json path/to/second-snapshot.json
 ```
 
-You need to be a super user to execute that command, to access the powercap files.
+You need to be a super user to execute the `snapshot` command, to access the powercap files.
 
 ## More information
 

@@ -1,68 +1,66 @@
-use crate::snapshot::Snapshot;
-use std::collections::{HashMap, HashSet};
-use std::time::Duration;
+use powercap::{IntelRaplSnapshot, SocketSnapshot};
+use std::ops::Sub;
+use std::time::SystemTime;
 
-fn both<A, B>(first: Option<A>, second: Option<B>) -> Option<(A, B)> {
-    if let (Some(first), Some(second)) = (first, second) {
-        Some((first, second))
-    } else {
-        None
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+pub struct RecordDifference {
+    /// Measurement duration in seconds
+    pub duration: f64,
+    /// Consumed energy in micro joules
+    pub energy: u64,
+    // TODO add the difference by socket and domains
+}
+
+impl RecordDifference {
+    pub fn to_json(&self) -> Result<String, String> {
+        serde_json::to_string(self).map_err(|err| format!("unable to convert to json: {:?}", err))
+    }
+
+    pub fn to_key_value(&self) -> String {
+        format!("duration={} energy={}", self.duration, self.energy)
     }
 }
 
-pub struct Record<'before, 'after> {
-    before: &'before Snapshot,
-    after: &'after Snapshot,
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+pub struct Record {
+    time: SystemTime,
+    sockets: Vec<SocketSnapshot>,
 }
 
-impl<'before, 'after> From<(&'before Snapshot, &'after Snapshot)> for Record<'before, 'after> {
-    fn from((before, after): (&'before Snapshot, &'after Snapshot)) -> Self {
-        Self { before, after }
-    }
-}
-
-impl<'before, 'after> Record<'before, 'after> {
-    pub fn duration(&self) -> Duration {
-        self.after
-            .time
-            .duration_since(self.before.time)
-            .expect("went back in time")
-    }
-
-    pub fn total_cpu_time(&self) -> u64 {
-        self.after.total_cpu_time() - self.before.total_cpu_time()
-    }
-
-    pub fn total_energy(&self) -> u64 {
-        self.after.total_energy() - self.before.total_energy()
-    }
-
-    pub fn processes_time(&self) -> HashMap<i32, u64> {
-        let before_times = self.before.processes_time();
-        let after_times = self.after.processes_time();
-        let before_pids = before_times.keys().copied().collect::<HashSet<_>>();
-        let after_pids = after_times.keys().copied().collect::<HashSet<_>>();
-        before_pids
-            .intersection(&after_pids)
-            .filter_map(|pid| {
-                both(before_times.get(pid), after_times.get(pid))
-                    .map(|item| (*pid, item.1 - item.0))
+impl Record {
+    fn total_energy(&self) -> u64 {
+        self.sockets
+            .iter()
+            .map(|item| {
+                item.domains
+                    .iter()
+                    .fold(item.energy, |res, domain| res + domain.energy)
             })
-            .collect::<HashMap<_, _>>()
+            .sum()
     }
+}
 
-    pub fn print(&self) {
-        let duration = self.duration().as_secs_f64();
-        let energy = self.total_energy();
-        let power = energy as f64 / duration;
-        let processes_time: u64 = self.processes_time().values().sum();
-        println!(
-            "duration={}s total_cpu_time={} processes_time={} energy={}µJ power={}µW",
-            duration,
-            self.total_cpu_time(),
-            processes_time,
-            energy,
-            power
-        );
+impl From<IntelRaplSnapshot> for Record {
+    fn from(cap: IntelRaplSnapshot) -> Self {
+        Self {
+            time: SystemTime::now(),
+            sockets: cap.sockets,
+        }
+    }
+}
+
+impl Sub for Record {
+    type Output = Result<RecordDifference, String>;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        // make sure that self is taken before rhs
+        let duration = rhs
+            .time
+            .duration_since(self.time)
+            .map_err(|err| format!("unable to compute duration between records: {:?}", err))?
+            .as_secs_f64();
+        let energy = rhs.total_energy() - self.total_energy();
+
+        Ok(RecordDifference { duration, energy })
     }
 }

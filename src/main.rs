@@ -1,18 +1,11 @@
-mod config;
-mod cpu_energy;
-mod cpu_time;
-mod process;
+mod command;
 mod record;
-mod snapshot;
+
+use clap::Parser;
 
 fn main() {
-    let config = config::Config::parse();
-    let snapshot_reader = config.snapshot_reader();
-    let before = snapshot_reader.read().unwrap();
-    config.execute();
-    let after = snapshot_reader.read().unwrap();
-    before.print();
-    after.print();
-    let record = record::Record::from((&before, &after));
-    record.print();
+    if let Err(err) = command::Command::parse().execute() {
+        eprintln!("{}", err);
+        std::process::exit(1);
+    }
 }
