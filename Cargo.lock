@@ -146,7 +146,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "powercap",
- "procfs",
+ "procfs 0.12.0",
  "serde",
  "serde_json",
  "temp-dir",
@@ -195,7 +195,7 @@ version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c97e7592fa933a8fe00a209c28c69dbbe4e6da20db89d5b3a069f1f7a99137e"
 dependencies = [
- "procfs",
+ "procfs 0.11.1",
  "regex",
  "serde",
 ]
@@ -235,13 +235,26 @@ dependencies = [
 
 [[package]]
 name = "procfs"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f2e7eea7c1d7beccbd5acc1e37ac844afccf176525674aad26ece3de1fc7733"
+checksum = "7718b88dae7b9b9be183ee274b10554b9aded035539230245275d7bc543fc0a4"
 dependencies = [
  "bitflags",
  "byteorder",
  "flate2",
+ "hex",
+ "lazy_static",
+ "libc",
+]
+
+[[package]]
+name = "procfs"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0941606b9934e2d98a3677759a971756eb821f75764d0e0d26946d08e74d9104"
+dependencies = [
+ "bitflags",
+ "byteorder",
  "hex",
  "lazy_static",
  "libc",
