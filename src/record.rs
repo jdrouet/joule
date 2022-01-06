@@ -16,7 +16,7 @@ fn now() -> u128 {
         .as_nanos()
 }
 
-fn total_energy(sockets: &Vec<SocketSnapshot>) -> u64 {
+fn total_energy(sockets: &[SocketSnapshot]) -> u64 {
     sockets
         .iter()
         .map(|item| {
