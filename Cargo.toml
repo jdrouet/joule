@@ -14,7 +14,7 @@ keywords = ["powercap", "rapl"]
 [dependencies]
 clap = { version = "3.1", features = ["derive"] }
 powercap = { version = "0.3" }
-procfs = { default-features = false, version = "0.12" }
+procfs = { default-features = false, version = "0.14" }
 
 [dev-dependencies]
 powercap = { version = "0.3", features = ["mock"] }
